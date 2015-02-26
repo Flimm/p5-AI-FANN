@@ -3,8 +3,9 @@
 use strict;
 use Test::More;
 
-plan skip_all => "Only the author needs to check that POD docs are right"
-    unless eval "no warnings; getlogin eq 'salva'";
+if (! $ENV{TEST_AUTHOR}) {
+    plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run';
+}
 
 eval "use Test::Pod 1.00";
 plan skip_all => "Test::Pod 1.00 required for testing POD" if $@;

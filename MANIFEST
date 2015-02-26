@@ -12,7 +12,7 @@ MANIFEST
 MANIFEST.SKIP
 ppport.h
 README
-t/AI-FANN.t
+t/xor.t
 t/pods.t
 lib/AI/FANN.pm
 samples/ox.pl
