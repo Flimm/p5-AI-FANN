@@ -3,6 +3,7 @@ use ExtUtils::MakeMaker;
 
 use strict;
 use warnings;
+use utf8;
 
 my $fann_lib = '';
 my $fann_inc = '';
@@ -32,7 +33,7 @@ WriteMakefile( NAME => 'AI::FANN',
                VERSION_FROM => 'lib/AI/FANN.pm',
                PREREQ_PM => {},
                ABSTRACT_FROM => 'lib/AI/FANN.pm',
-               AUTHOR => 'Salvador Fandiño <sfandino@yahoo.com>',
+               AUTHOR => 'Salvador FandiÃ±o <sfandino@yahoo.com>',
                LIBS => ["${fann_lib}-ldoublefann"],
                DEFINE => '',
                INC => "${fann_inc}-I.",
