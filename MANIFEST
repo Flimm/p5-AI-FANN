@@ -9,6 +9,7 @@ genaccessors
 genconstants
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 ppport.h
 README
 t/AI-FANN.t
@@ -17,4 +18,6 @@ lib/AI/FANN.pm
 samples/ox.pl
 samples/add.pl
 samples/xor.pl
+MYMETA.json
+MYMETA.yml
 META.yml                                 Module meta-data (added by MakeMaker)

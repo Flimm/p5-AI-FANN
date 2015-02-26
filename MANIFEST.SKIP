@@ -1,0 +1,9 @@
+^\.git
+~$
+\.swp$
+^blib$
+FANN\.c$
+\.o$
+^blib\b
+^Makefile$
+^pm_to_blib$
