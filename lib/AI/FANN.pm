@@ -1,6 +1,6 @@
 package AI::FANN;
 
-our $VERSION = '0.10';
+our $VERSION = '0.10.1';
 
 use strict;
 use warnings;

@@ -1,5 +1,8 @@
 Revision history for Perl extension AI::FANN.
 
+0.10.1 Feb 27, 2015 (unofficial)
+    - Add new set_callback method
+
 0.10 Mar 10, 2009
     - syntax error in Makefile.PL (bug report by Michael Stevens)
     - backport OpenBSD patch for Makefile.PL
