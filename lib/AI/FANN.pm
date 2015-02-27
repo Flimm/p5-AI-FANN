@@ -10,6 +10,12 @@ require XSLoader;
 XSLoader::load('AI::FANN', $VERSION);
 
 use Exporter qw(import);
+use Scalar::Util qw(refaddr);
+
+# %_callback_for_ann is like an inside-out object for callback data that can't
+# fit in the struct. It's public but marked private to allow tests to access
+# it.
+our %_callback_for_ann;
 
 {
     my @constants = _constants();
@@ -34,6 +40,18 @@ sub num_neurons {
     else {
         $self->total_neurons;
     }
+}
+
+sub set_callback {
+    @_ == 2 or croak "Usage: set_callback(self, callback)";
+    my ($self, $callback) = @_;
+
+    croak "self is not a reference" if ! ref($self);
+    croak "callback is not a code reference" if ! defined($callback) || ref($callback) ne "CODE";
+
+    $_callback_for_ann{$self->_get_struct_addr} = $callback;
+    $self->_enable_perl_callback;
+    return;
 }
 
 1;
@@ -531,6 +549,25 @@ return the number of neurons on layer C<$layer_index>.
 =item $ann->num_neurons
 
 return a list with the number of neurons on every layer
+
+=item $ann->set_callback($callback)
+
+Sets the callback for use during training. If this is not set, the default
+callback function simply prints out some status information. $callback may not
+be undefined. Here's an example of a callback:
+
+  $callback = sub {
+    my ($unused1, $unused2, $max_epochs, $epochs_between_reports,
+        $desired_error, $epochs) = @_;
+    printf("Epochs: %d\n", $epochs);
+    return 0;
+  }
+
+The callback is called in scalar context. It should return an integer or undef,
+if the callback function returns -1, the training will terminate.
+
+Note that the first two arguments are unused, they are currently undef, but may
+be changed in future versions to the AI::FANN and AI::FANN::TrainData objects.
 
 =back
 

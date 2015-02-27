@@ -15,6 +15,7 @@ README
 t/xor.t
 t/pods.t
 t/memory_leak.t
+t/callback.t
 lib/AI/FANN.pm
 samples/ox.pl
 samples/add.pl

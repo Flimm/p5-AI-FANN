@@ -73,6 +73,49 @@ _fta2sv(pTHX_ fann_type *fta, unsigned int len) {
     return newRV_noinc((SV*)av);
 }
 
+int FANN_API
+call_perl_callback(struct fann *ann, struct fann_train_data *train,
+              unsigned int max_epochs, unsigned int epochs_between_reports,
+              float desired_error, unsigned int epochs)
+{
+    dTHX;
+    HV *callback_hash = get_hv("AI::FANN::_callback_for_ann", 0);
+    if (! callback_hash) {
+        Perl_croak(aTHX_ "Could not get callback hash");
+    }
+    char buffer[256];
+    if (snprintf(buffer, sizeof(buffer), "%" IVdf, PTR2IV(ann)) >= sizeof(buffer)) {
+        Perl_croak(aTHX_ "Could not store key in buffer");
+    }
+    SV **callback = hv_fetch(callback_hash, buffer, strlen(buffer), NULL);
+    if (! callback) {
+        Perl_croak(aTHX_ "Could not get callback");
+    }
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    XPUSHs(&PL_sv_undef);
+    XPUSHs(&PL_sv_undef);
+    XPUSHs(sv_2mortal(newSViv(max_epochs)));
+    XPUSHs(sv_2mortal(newSViv(epochs_between_reports)));
+    XPUSHs(sv_2mortal(newSVnv(desired_error)));
+    XPUSHs(sv_2mortal(newSViv(epochs)));
+    PUTBACK;
+    int count = call_sv(*callback, G_SCALAR);
+    SPAGAIN;
+    SV *return_sv = POPs;
+    int return_value = 0;
+    if (SvOK(return_sv)) {
+        return_value = SvIV(return_sv);
+    }
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+    return return_value;
+}
+
+
 static AV*
 _srv2av(pTHX_ SV* sv, unsigned int len, char * const name) {
     if (SvROK(sv)) {
@@ -211,6 +254,20 @@ fann_new_standard(klass, ...)
   CLEANUP:
     _check_error(aTHX_ (struct fann_error *)RETVAL);
 
+void
+fann__enable_perl_callback(self)
+    struct fann * self;
+  CODE:
+    fann_set_callback(self, call_perl_callback);
+
+int
+fann__get_struct_addr(self)
+    struct fann * self;
+  CODE:
+    RETVAL = PTR2IV(self);
+  OUTPUT:
+    RETVAL
+
 struct fann *
 fann_new_sparse(klass, connection_rate, ...)
     SV *klass;
@@ -267,6 +324,18 @@ void
 fann_DESTROY(self)
     struct fann * self;
   CODE:
+    HV *callback_hash = get_hv("AI::FANN::_callback_for_ann", 0);
+    if (! callback_hash) {
+        Perl_croak(aTHX_ "Could not get callback hash");
+    }
+    char buffer[256];
+    if (snprintf(buffer, sizeof(buffer), "%" IVdf, PTR2IV(self)) >= sizeof(buffer)) {
+        Perl_croak(aTHX_ "Could not store key in buffer");
+    }
+    SV **callback = hv_fetch(callback_hash, buffer, strlen(buffer), NULL);
+    if (hv_exists(callback_hash, buffer, strlen(buffer))) {
+        hv_delete(callback_hash, buffer, strlen(buffer), G_DISCARD);
+    }
     fann_destroy(self);
     sv_unmagic(SvRV(ST(0)), '~');
 
